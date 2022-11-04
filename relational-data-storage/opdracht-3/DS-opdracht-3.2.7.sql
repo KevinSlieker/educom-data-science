@@ -1,0 +1,1 @@
+select name, straat, huisnr, postcode from mhl_suppliers where name like "'t%";
