@@ -78,3 +78,41 @@ BEGIN
 UPDATE employees SET salary = CAST(salary * 1.05 AS UNSIGNED);
 end$$
 DELIMITER ;
+
+-- opdracht 7
+-- Create a stored procedure which removes all fired employees;
+DROP PROCEDURE if exists p_remove_fired_employees;
+DELIMITER $$
+CREATE PROCEDURE p_remove_fired_employees()
+BEGIN
+delete from employees where date_fired is not null;
+end$$
+DELIMITER ;
+
+-- opdracht 8
+-- All employee salary modifications should be logged in a (new) salaryArchive table
+DROP TRIGGER IF EXISTS employees_salaryChange_aur;
+DELIMITER $$
+
+CREATE TRIGGER employees_salaryChange_aur
+AFTER UPDATE
+ON employees FOR EACH ROW
+BEGIN
+
+    IF new.salary <> old.salary THEN
+        INSERT INTO salaryArchive(`employeeNumber`, `before_salary` , `after_salary`)
+        VALUES(OLD.employeeNumber, old.salary, new.salary);
+    END IF;
+END$$
+
+DELIMITER ;
+
+    CREATE TABLE if not exists `salaryArchive` (
+    `id` int auto_increment,
+`employeeNumber` int(11) NOT NULL,
+  `before_salary` int(11),
+  `after_salary` int(11),
+  PRIMARY KEY (`id`),
+  key (`employeeNumber`),
+  constraint `salaryArchive_ibfk_1` foreign key (`employeeNumber`) references `employees`(`employeeNumber`) on delete no action
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
